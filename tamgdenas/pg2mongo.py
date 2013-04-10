@@ -7,58 +7,70 @@ import urllib2
 import base64
 
 conn = psycopg2.connect("dbname='poi' user='postgres' host='localhost' password='postgres'",connection_factory=psycopg2.extras.DictConnection)
-cur = conn.cursor()
 
 mConn = Connection()
+mConn.drop_database("poi")
 mPoi = mConn.poi.poi
 mPoiTypes = mConn.poi.poiTypes
 mReviews = mConn.poi.reviews
 
-
 def processType(parent, mParentId):
+	global mPoiTypes
+	cur = conn.cursor()
 	cur.execute("select * from foursquare_categories_en where parent_id = %s", (parent,))
-	buf = cur.fetchall()
-	for iter in buf:
+	for iter in cur:
+		icon = None
+		try:
+			icon = base64.b64encode(urllib2.urlopen(iter["icon_url"]).read())
+		except:
+			icon = None
 		obj = {
 			"name": iter["name"],
-			"icon": base64.b64encode(urllib2.urlopen(iter["icon_url"]).read()),
+			"icon": icon,
 			"parent": mParentId
 		}
-		print obj
 		id = mPoiTypes.insert(obj)
 		processType(iter["id"], id)
 processType("root", None)
+print "types ok"
 	
 
-cur.execute("SELECT foursquare.* from foursquare")
-rows = cur.fetchall()
+cur = conn.cursor()
+cur.execute("SELECT foursquareid, categories, name, lat, lng, description from foursquare")
 
 c = 0
-for row in rows:
-	cur.execute("select tag from foursquare_tags where foursquareid='"+row.foursquareid+"'")
-	buf = cur.fetchall()
+for row in cur:
+	cur2 = conn.cursor()
+	cur2.execute("select tag from foursquare_tags where foursquareid='"+row["foursquareid"]+"'")
 	tags = []
-	for rec in buf:
+	for rec in cur2:
 		tags.append(rec["tag"])
 		
-	cur.execute("select url from foursquare_photos where foursquareid='"+row.foursquareid+"'")
-	buf = cur.fetchall()
+	cur2 = conn.cursor()
+	cur2.execute("select url from foursquare_photos where foursquareid='"+row["foursquareid"]+"'")
 	photos = []
-	for rec in buf:
-		photos.append(base64.b64encode(urllib2.urlopen(rec["url"]).read()))
+	for rec in cur2:
+		photo = None
+		try:
+			photo = base64.b64encode(urllib2.urlopen(rec["url"]).read())
+		except:
+			photo = None
+		if photo:
+			photos.append(photo)
 	
 	types = []
-	buf = row.categoires.split(";")
-	for typeName in buf:
-		cur = mPoiTypes.find({"name": typeName}, {"_id":1})
-		obj = next(cur, None)
-		if(obj):
-			types.append(obj._id)
+	if row["categories"]:
+		buf = row["categories"].split(";")
+		for typeName in buf:
+			cur2 = mPoiTypes.find({"name": typeName}, {"_id":1})
+			obj = next(cur2, None)
+			if(obj):
+				types.append(obj["_id"])
 			
 	reviews = []
-	cur.execute("select text from foursquare_tips where foursquareid='"+row.foursquareid+"'")
-	buf = cur.fetchall()
-	for review in buf:
+	cur2 = conn.cursor()
+	cur2.execute("select text from foursquare_tips where foursquareid='"+row["foursquareid"]+"'")
+	for review in cur2:
 		reviews.append(mReviews.insert({"text": review["text"]}))
 	
 	
@@ -73,5 +85,6 @@ for row in rows:
 	}
 	mPoi.insert(obj)
 	c+=1
-print c
-
+	if c % 1000 == 0:
+		print c
+print "poi ok"

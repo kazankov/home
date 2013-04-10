@@ -36,7 +36,7 @@ print "types ok"
 	
 
 cur = conn.cursor()
-cur.execute("SELECT foursquareid, categories, name, lat, lng, description from foursquare")
+cur.execute("SELECT distinct foursquareid, categories, name, lat, lng, description from foursquare")
 
 c = 0
 for row in cur:

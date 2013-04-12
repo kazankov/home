@@ -96,6 +96,6 @@ for row in cur:
 		c+=1
 		if c % 1000 == 0:
 			print str(c)+"_"+str(c2)
-	except Exception as e:
-		print "Error"+e.strerror		
+	except Exception, e:
+		print "Error"+str(e)		
 print "poi ok"

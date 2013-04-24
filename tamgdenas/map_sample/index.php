@@ -18,34 +18,31 @@
 <tr>
 <td>
 <?php //русский текст 
-	function processNode($node)
+	$mongo = new MongoClient("mongodb://217.199.220.183");
+	function getTypes($parentId=null)
 	{
-	?>
-		<li id="<?=$node->id?>"><?=$node->title?>
-		<? if(count($node->children)>0) 
-		{ ?>
-		<ul>
-			<? 
-				foreach($node->children as $child)
-				{
-					processNode($child);
-				}
-			?>
-		</ul>	
-		</li>
-	<?
+		global $mongo;
+		$cursor = $mongo->poi->poiTypes->find(array('parent'=>$parentId));
+		if(count($cursor) > 0)
+		{
+		?>
+			<ul>
+			<? foreach($cursor as $iter) { ?>
+				<li id="<?=$iter['_id']?>"><?=$iter['name']?>
+			<?	getTypes($iter['_id']);
+			} ?>
+			</ul>
+		<?
 		}
 	}
 ?>
 	<div id="tree">
-		<ul>
-			<? foreach($... as $typeRec) { processNode($typeRec); }?>
-		</ul>
+		<? getTypes(); ?>
 	</div>
 </td>
 <td>
 <?php 
-	$map->draw('100%', '500px');
+	//$map->draw('100%', '500px');
 ?>
 </td>
 </tr>

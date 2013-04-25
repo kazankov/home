@@ -47,7 +47,7 @@
 <tr>
 <td valign="top">
 <?php //русский текст 
-	$mongo = new MongoClient("mongodb://217.199.220.183");
+	$mongo = new MongoClient();//"mongodb://217.199.220.183"
 	function getTypes($parentId=null)
 	{
 		global $mongo;

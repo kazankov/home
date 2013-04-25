@@ -5,6 +5,7 @@ from pymongo import Connection
 import json
 import urllib2
 import base64
+import sys
 
 conn = psycopg2.connect("dbname='poi' user='postgres' host='localhost' password='postgres'",connection_factory=psycopg2.extras.DictConnection)
 
@@ -35,7 +36,7 @@ def processType(parent, mParentId):
 		processType(iter["id"], id)
 processType("root", None)
 print "types ok"
-	
+sys.stdout.flush()
 
 cur = conn.cursor()
 cur.execute("SELECT distinct foursquareid, categories, name, lat, lng, description from foursquare")
@@ -96,6 +97,8 @@ for row in cur:
 		c+=1
 		if c % 1000 == 0:
 			print str(c)+"_"+str(c2)
+			sys.stdout.flush()
 	except Exception, e:
-		print "Error"+str(e)		
+		print "Error"+str(e)
+		sys.stdout.flush()
 print "poi ok"

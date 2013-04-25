@@ -19,7 +19,8 @@
 	var tree = null;
 	$(function(){
 		tree = $("#tree").dynatree({
-			checkbox: true
+			checkbox: true,
+			selectMode: 3
 		}).dynatree('getRoot');
 		
 		<? $map->doLoad();?>
@@ -35,8 +36,8 @@
 
 		cmdAsync(prepareCmd('pois.php', {types: types}), function(pois)
 		{
-			alert(JSON.stringify(pois));
-			//map.addMarkers(pois);
+			$('#cnt').text('Найдено '+pois.length+' POI'); 
+			map.addMarkers(pois);
 		});
 	}
 </script>
@@ -65,12 +66,13 @@
 	}
 ?>
 	<button onclick="refreshMap();">Отобразить POI</button>
+	<div id="cnt"></div>
 	<div id="tree">
 		<? getTypes(); ?>
 	</div>
 	
 </td>
-<td>
+<td valign="top">
 <?php 
 	$map->draw('800px', '600px');
 ?>

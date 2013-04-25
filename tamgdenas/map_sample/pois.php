@@ -11,7 +11,7 @@ if($_GET['types'])
 	}
 }
 $out = array();
-$limit = 10;
+$limit = 1000000;
 
 $cursor=null;
 if(count($poitypes) > 0)

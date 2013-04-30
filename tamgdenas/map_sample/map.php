@@ -184,6 +184,11 @@ var map = function()
 			}
 			
 			directionsDisplay.setDirections(route);	
+		},
+		
+		getBounds: function()
+		{
+			return canvas.getBounds();
 		}
 	}
 }();

@@ -43,7 +43,12 @@
 			
 			if(req.status == 200)
 			{
-				callback.call(ctx, JSON.parse(req.responseText));//преобразование строки в структуру
+				try
+				{
+					callback.call(ctx, JSON.parse(req.responseText));//преобразование строки в структуру
+				}catch(e){
+					alert("error parsing: " + req.responseText);
+				}
 			}else{
 				alert("error! command: "+cmd+"\nresponse: "+req.responseText);
 			}

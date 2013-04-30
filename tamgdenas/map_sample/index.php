@@ -33,8 +33,10 @@
 		$.map(selNodes, function(node1){
             types.push(node1.data.key);
 		});
+		
+		var bounds = map.mc.getExtendedBounds(map.getBounds());
 
-		cmdAsync(prepareCmd('pois.php', {types: types}), function(pois)
+		cmdAsync(prepareCmd('pois.php', {types: types, bounds: bounds.toUrlValue()}), function(pois)
 		{
 			$('#cnt').text('Найдено '+pois.length+' POI'); 
 			map.addMarkers(pois);
@@ -47,7 +49,7 @@
 <tr>
 <td valign="top">
 <?php //русский текст 
-	$mongo = new MongoClient("mongodb://localhost");//"mongodb://217.199.220.183"
+	$mongo = new MongoClient("mongodb://217.199.220.183");//"mongodb://217.199.220.183"
 	function getTypes($parentId=null)
 	{
 		global $mongo;

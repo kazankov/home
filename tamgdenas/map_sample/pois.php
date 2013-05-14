@@ -11,7 +11,7 @@ if($_GET['types'])
 	}
 }
 $out = array();
-$limit = 1000000;
+$limit = 100000;
 
 $cursor=null;
 $params = array();
@@ -22,18 +22,24 @@ if(count($poitypes) > 0)
 if($_GET['bounds'])
 {
 	list($latBottom, $lonLeft, $latTop, $lonRight) = explode(',', $_GET['bounds']);
-	$params['geoPoint'] = array('$within'=>
+	$latBottom = (int)$latBottom;
+	$lonLeft = (int)$lonLeft;
+	$latTop = (int)$latTop;
+	$lonRight = (int)$lonRight;
+	$params['geoPoint'] = array('$geoWithin'=>
 		array('$box'=>
 			array(
-				array($lonLeft, $latBottom),
-				array($lonRight, $latTop)
+				array($latBottom, $lonLeft),
+				array($latTop, $lonRight)
 			)
 		)
 	);	
 }
+
 $cursor = $mongo->poi->poi->find($params)->limit($limit);
-foreach($cursor as $iter)
+for($i=0; $i < $limit; $i++)
 {
+	if(!$iter = $cursor->getNext()) break;
 	$buf = (object)array();
 	$buf->name = $iter['name'];
 	$buf->latitude = $iter['geoPoint']['lat'];

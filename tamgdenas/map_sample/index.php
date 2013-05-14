@@ -36,6 +36,8 @@
 		
 		var bounds = map.mc.getExtendedBounds(map.getBounds());
 
+		$('#cnt').text('...');
+		map.clearMarkers();
 		cmdAsync(prepareCmd('pois.php', {types: types, bounds: bounds.toUrlValue()}), function(pois)
 		{
 			$('#cnt').text('Найдено '+pois.length+' POI'); 

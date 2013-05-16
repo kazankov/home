@@ -36,7 +36,7 @@ def processType(parent, mParentId):
 			"icon": icon,
 			"parent": mParentId
 		}
-		id = mPoiTypes.insert(obj)
+		id = mPoiTypes.insert(obj, safe=True)
 		processType(iter["id"], id)
 processType("root", None)
 print "types ok"
@@ -84,7 +84,7 @@ for row in cur:
 		cur2 = conn.cursor()
 		cur2.execute("select text from foursquare_tips where foursquareid='"+row["foursquareid"]+"'")
 		for review in cur2:
-			reviews.append(mReviews.insert({"text": review["text"]}))
+			reviews.append(mReviews.insert({"text": review["text"]}, safe=True))
 		
 		
 		obj = {
@@ -97,7 +97,7 @@ for row in cur:
 			"reviews": reviews,
 			"sourceId": "foursquare_"+row["foursquareid"]
 		}
-		mPoi.insert(obj)
+		mPoi.insert(obj, safe=True)
 		c+=1
 		if c % 1000 == 0:
 			print str(c)+"_"+str(c2)

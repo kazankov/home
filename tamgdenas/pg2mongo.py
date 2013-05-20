@@ -24,7 +24,7 @@ def processType(parent, mParentId):
 	cur = conn.cursor()
 	cur.execute("select * from foursquare_categories_en where parent_id = %s", (parent,))
 	for iter in cur:
-		if mPoiTypes.find_one({"name": iter["name"]}):
+		if mPoiTypes.find_one({"sourceName": iter["name"]}):
 			continue
 		icon = None
 		try:
@@ -34,7 +34,8 @@ def processType(parent, mParentId):
 		obj = {
 			"name": iter["name"],
 			"icon": icon,
-			"parent": mParentId
+			"parent": mParentId,
+			"sourceName": ...
 		}
 		id = mPoiTypes.insert(obj, safe=True)
 		processType(iter["id"], id)

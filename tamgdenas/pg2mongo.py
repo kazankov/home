@@ -19,30 +19,6 @@ mPoi = mConn.poi.poi
 mPoiTypes = mConn.poi.poiTypes
 mReviews = mConn.poi.reviews
 
-def processType(parent, mParentId):
-	global mPoiTypes
-	cur = conn.cursor()
-	cur.execute("select * from foursquare_categories_en where parent_id = %s", (parent,))
-	for iter in cur:
-		if mPoiTypes.find_one({"sourceName": iter["name"]}):
-			continue
-		icon = None
-		try:
-			icon = base64.b64encode(urllib2.urlopen(iter["icon_url"]).read())
-		except:
-			icon = None
-		obj = {
-			"name": iter["name"],
-			"icon": icon,
-			"parent": mParentId,
-			"sourceName": ...
-		}
-		id = mPoiTypes.insert(obj, safe=True)
-		processType(iter["id"], id)
-processType("root", None)
-print "types ok"
-sys.stdout.flush()
-
 cur = conn.cursor()
 cur.execute("SELECT distinct foursquareid, categories, name, lat, lng, description from foursquare")
 
@@ -76,10 +52,12 @@ for row in cur:
 		if row["categories"]:
 			buf = row["categories"].split(";")
 			for typeName in buf:
-				cur2 = mPoiTypes.find({"name": typeName}, {"_id":1})
+				cur2 = mPoiTypes.find({"sourceNames": typeName}, {"_id":1})
 				obj = next(cur2, None)
 				if(obj):
 					types.append(obj["_id"])
+		if not types:
+			continue #соответствующих типов не найдено, пропускаем
 				
 		reviews = []
 		cur2 = conn.cursor()

@@ -26,7 +26,7 @@ if($_GET['bounds'])
 	$lonLeft = (int)$lonLeft;
 	$latTop = (int)$latTop;
 	$lonRight = (int)$lonRight;
-	$params['geoPoint'] = array('$geoWithin'=>
+	$params['geoPoint'] = array('$within'=>
 		array('$box'=>
 			array(
 				array($latBottom, $lonLeft),

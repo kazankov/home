@@ -9,11 +9,11 @@ import sys
 
 conn = psycopg2.connect("dbname='poi' user='postgres' host='localhost' password='postgres'",connection_factory=psycopg2.extras.DictConnection)
 
-mConn = Connection()
+mConn = Connection("217.199.220.182")
 #**** base creation
-#mConn.drop_database("poi")
-#mConn.poi.poi.ensure_index('sourceId');
-#mConn.poi.poi.ensure_index('geoPoint', '2d');
+mConn.drop_database("poi")
+mConn.poi.poi.ensure_index('sourceId');
+mConn.poi.poi.ensure_index('geoPoint', '2d');
 #******************
 mPoi = mConn.poi.poi
 mPoiTypes = mConn.poi.poiTypes

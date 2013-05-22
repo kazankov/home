@@ -11,7 +11,6 @@ conn = psycopg2.connect("dbname='poi' user='postgres' host='localhost' password=
 
 mConn = Connection("217.199.220.182")
 #**** base creation
-mConn.drop_database("poi")
 mConn.poi.poi.ensure_index('sourceId');
 mConn.poi.poi.ensure_index('geoPoint', '2d');
 #******************
@@ -57,7 +56,7 @@ for row in cur:
 				if(obj):
 					types.append(obj["_id"])
 		if not types:
-			continue #соответствующих типов не найдено, пропускаем
+			continue #no types found, skip
 				
 		reviews = []
 		cur2 = conn.cursor()

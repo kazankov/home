@@ -1,6 +1,6 @@
 <?
 //русский текст
-$mongo = new MongoClient("mongodb://217.199.220.183");//"mongodb://217.199.220.183"
+$mongo = new MongoClient("mongodb://217.199.220.182");//"mongodb://217.199.220.183"
 $poitypes = array();
 if($_GET['types']) 
 {

@@ -7,6 +7,8 @@ foreach($cfg as $k=>$v)
 $cfg = (object)$cfg;
 
 $mongo = new MongoClient("mongodb://{$cfg->mongo->host}");
+$pg = pg_connect("host={$cfg->pg->host} dbname={$cfg->pg->db} user={$cfg->pg->user} password={$cfg->pg->password}");
+
 function getOurTypes($parentId=null)
 {
 	global $mongo;
@@ -64,6 +66,7 @@ function getOurTypes($parentId=null)
 	}
 	
 	var ourTree = null;
+	var foursquareTree = null;
 	
 	
 	$(document).ready(function()
@@ -71,6 +74,7 @@ function getOurTypes($parentId=null)
 		Tabs($('#sources .header'), $('#sources .body')); 
 		
 		ourTree = $("#ourTree").dynatree({}).dynatree('getRoot');
+		foursquareTree = $("#foursquareTree").dynatree({}).dynatree('getRoot');
 	});
 </script>
 <style type="text/css">
@@ -98,7 +102,27 @@ function getOurTypes($parentId=null)
 					<span>geonames</span>
 				</div>
 				<div class="body">
-					<div>foursquare</div>
+					<div id="foursquareTree">
+<?
+function getFoursquareTypes($parentId=null)
+{
+	global $pg;
+	$result = pg_query("select * from foursquare_categories_en where parent_id = '{$parentId}'") or die('Query failed: ' . pg_last_error());
+	if(pg_num_rows($result) > 0)
+	{
+	?>
+		<ul>
+		<? while ($iter = pg_fetch_array($result, null, PGSQL_ASSOC)) { ?>
+			<li id="<?=$iter['id']?>"><?=$iter['name']?>
+		<?	getFoursquareTypes($iter['id']);
+		} ?>
+		</ul>
+	<?
+	}
+}
+getFoursquareTypes('root');
+?>					
+					</div>
 					<div>google places</div>
 					<div>geonames</div>				
 				</div>

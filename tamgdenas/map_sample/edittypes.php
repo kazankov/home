@@ -73,8 +73,24 @@ function getOurTypes($parentId=null)
 	{
 		Tabs($('#sources .header'), $('#sources .body')); 
 		
-		ourTree = $("#ourTree").dynatree({}).dynatree('getRoot');
-		foursquareTree = $("#foursquareTree").dynatree({}).dynatree('getRoot');
+		ourTree = $("#ourTree").dynatree(
+		{
+			dnd: 
+			{
+			    onDragEnter: function(node, sourceNode) 
+				{
+					return ["over"];
+				},
+			    onDrop: function(node, sourceNode, hitMode, ui, draggable) {alert(sourceNode);}
+			}
+		}).dynatree('getRoot');
+		foursquareTree = $("#foursquareTree").dynatree(
+		{
+			dnd: 
+			{
+				onDragStart: function(){return true;}
+			}
+		}).dynatree('getRoot');
 	});
 </script>
 <style type="text/css">

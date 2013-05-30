@@ -33,6 +33,8 @@ function getOurTypes($parentId=null)
 <script src="/js/jquery-ui.custom.min.js" type="text/javascript"></script>
 <link href="/css/ui.dynatree.css" rel="stylesheet" type="text/css">
 <script src="/js/jquery.dynatree.min.js" type="text/javascript"></script>
+<script src="/js/jquery.contextMenu-custom.js" type="text/javascript"></script>
+<link href="/css/jquery.contextMenu.css" rel="stylesheet" type="text/css" >
 <script language="Javascript">
 	function Tabs(header, body)
 	{
@@ -65,6 +67,13 @@ function getOurTypes($parentId=null)
 		header.find('>:first-child').trigger('click');
 	}
 	
+	function bindContextMenu(node, span) {
+		$(span).contextMenu({menu: 'ourMenu'}, function(action, el, pos) {
+			var node = $.ui.dynatree.getNode(el);
+
+		});
+	};	
+	
 	var ourTree = null;
 	var foursquareTree = null;
 	
@@ -82,7 +91,8 @@ function getOurTypes($parentId=null)
 					return ["over"];
 				},
 			    onDrop: function(node, sourceNode, hitMode, ui, draggable) {alert(sourceNode);}
-			}
+			},
+			onCreate: bindContextMenu
 		}).dynatree('getRoot');
 		foursquareTree = $("#foursquareTree").dynatree(
 		{
@@ -100,6 +110,12 @@ function getOurTypes($parentId=null)
 </style>
 </head>
 <body>
+
+<ul id="ourMenu" class="contextMenu">
+	<li class="edit"><a href="#edit">Изменить</a></li>
+	<li class="delete separator"><a href="#delete">Удалить</a></li>
+	<li class="addchild"><a href="#addchild">Потомок</a></li>
+</ul>
 
 <table>
 	<tr>

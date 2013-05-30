@@ -35,6 +35,7 @@ function getOurTypes($parentId=null)
 <script src="/js/jquery.dynatree.min.js" type="text/javascript"></script>
 <script src="/js/jquery.contextMenu-custom.js" type="text/javascript"></script>
 <link href="/css/jquery.contextMenu.css" rel="stylesheet" type="text/css" >
+<script src="/js/jquery.simplemodal.js" type="text/javascript"></script>
 <script language="Javascript">
 	function Tabs(header, body)
 	{
@@ -68,11 +69,19 @@ function getOurTypes($parentId=null)
 	}
 	
 	function bindContextMenu(node, span) {
-		$(span).contextMenu({menu: 'ourMenu'}, function(action, el, pos) {
+		$(span).contextMenu({menu: 'ourMenu'}, function(action, el, pos) 
+		{
 			var node = $.ui.dynatree.getNode(el);
-
+			
+			if(action == 'edit') 
+			{
+				$('#ourEditForm').modal();
+				return false;
+			}
+			
+			//exec('treeaction.php', {tree: 'our', action: action, 
 		});
-	};	
+	}
 	
 	var ourTree = null;
 	var foursquareTree = null;
@@ -101,21 +110,34 @@ function getOurTypes($parentId=null)
 				onDragStart: function(){return true;}
 			}
 		}).dynatree('getRoot');
+		
 	});
 </script>
 <style type="text/css">
 	#sources .header .active {background-color:white;border-bottom: 1px solid white;}
 	#sources .header>*{cursor: pointer; border: 1px solid black;   background-color: #cccccc; display:inline-block; padding:5px; position: relative; top:1px;}
 	#sources .body {border: 1px solid black; padding:5px;}
+	
+	label, input { display:block; }
 </style>
 </head>
 <body>
 
-<ul id="ourMenu" class="contextMenu">
+<ul id="ourMenu" class="contextMenu" title="Редактирование типа">
 	<li class="edit"><a href="#edit">Изменить</a></li>
 	<li class="delete separator"><a href="#delete">Удалить</a></li>
+	<li class="add"><a href="#add">Добавить</a></li>
 	<li class="addchild"><a href="#addchild">Потомок</a></li>
 </ul>
+
+<div id="ourEditForm" title="Редактирование типа" style="display:none; border:1px solid black; padding-bottom:10px;">
+	<div style="text-align:right;background-color:#cccccc; border-bottom: 1px solid black;"><span class="simplemodal-close" style="display:inline-block; cursor:pointer; padding-right:5px;"><b>x</b></span></div>
+	<fieldset style="border:0">
+		<label for="name" >Название</label> <input type="text" name="name" id="name" />
+		<label for="alias" >Алиасы</label> <input type="text" name="alias" id="alias"  />
+	</fieldset>
+	<div style="text-align:center"><button>OK</button></div>
+</div>
 
 <table>
 	<tr>

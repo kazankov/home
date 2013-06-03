@@ -18,7 +18,7 @@ function getOurTypes($parentId=null)
 	?>
 		<ul>
 		<? foreach($cursor as $iter) { ?>
-			<li id="<?=$iter['_id']?>"><?=$iter['name']?>
+			<li id="<?=$iter['_id']?>"  my-alias="<?$iter['sourceNames']?>"><?=$iter['name']?>
 		<?	getOurTypes($iter['_id']);
 		} ?>
 		</ul>
@@ -75,7 +75,40 @@ function getOurTypes($parentId=null)
 			
 			if(action == 'edit') 
 			{
-				$('#ourEditForm').modal();
+				$('#ourEditForm').modal({
+					onShow: function(dialog)
+					{
+						var nameEl = dialog.data.find('.name').first();
+						var aliasEl = dialog.data.find('.alias').first();
+						
+						nameEl.val(node.data.title);
+						aliasEl.val(el.attr('my-alias'));
+						dialog.data.find('.ok').click(function()
+						{
+							var name = nameEl.val();
+							var alias = aliasEl.val();
+							$.modal.close();
+							exec('treeaction.php', 
+								{
+									tree:'our',
+									action: 'edit',
+									id: node.data.key,
+									name: name,
+									alias: alias
+								}, 
+								function(res)
+								{
+									if(res)
+									{
+										node.data.title = name;
+										el.attr('my-alias', alias);
+										node.render();
+									}
+								}
+							);	
+						});
+					}
+				});
 				return false;
 			}
 			
@@ -133,10 +166,10 @@ function getOurTypes($parentId=null)
 <div id="ourEditForm" title="Редактирование типа" style="display:none; border:1px solid black; padding-bottom:10px;">
 	<div style="text-align:right;background-color:#cccccc; border-bottom: 1px solid black;"><span class="simplemodal-close" style="display:inline-block; cursor:pointer; padding-right:5px;"><b>x</b></span></div>
 	<fieldset style="border:0">
-		<label for="name" >Название</label> <input type="text" name="name" id="name" />
-		<label for="alias" >Алиасы</label> <input type="text" name="alias" id="alias"  />
+		<label for="name" >Название</label> <input type="text" name="name"  class="name" />
+		<label for="alias" >Алиасы</label> <input type="text" name="alias"  class="alias"  />
 	</fieldset>
-	<div style="text-align:center"><button>OK</button></div>
+	<div style="text-align:center"><button class="ok">OK</button></div>
 </div>
 
 <table>

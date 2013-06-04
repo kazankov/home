@@ -18,7 +18,7 @@ function getOurTypes($parentId=null)
 	?>
 		<ul>
 		<? foreach($cursor as $iter) { ?>
-			<li id="<?=$iter['_id']?>"  my-alias="<?$iter['sourceNames']?>"><?=$iter['name']?>
+			<li id="<?=$iter['_id']?>"  data="alias: '<?if($iter['sourceNames']) echo implode(', ', $iter['sourceNames']);?>', name: '<?=addslashes($iter['name'])?>'"><?=$iter['name']?> <?if($iter['sourceNames']) echo "(".implode(', ', $iter['sourceNames']).")";?>
 		<?	getOurTypes($iter['_id']);
 		} ?>
 		</ul>
@@ -36,6 +36,7 @@ function getOurTypes($parentId=null)
 <script src="/js/jquery.contextMenu-custom.js" type="text/javascript"></script>
 <link href="/css/jquery.contextMenu.css" rel="stylesheet" type="text/css" >
 <script src="/js/jquery.simplemodal.js" type="text/javascript"></script>
+<script src="/js/common.js" type="text/javascript"></script>
 <script language="Javascript">
 	function Tabs(header, body)
 	{
@@ -81,27 +82,29 @@ function getOurTypes($parentId=null)
 						var nameEl = dialog.data.find('.name').first();
 						var aliasEl = dialog.data.find('.alias').first();
 						
-						nameEl.val(node.data.title);
-						aliasEl.val(el.attr('my-alias'));
+						nameEl.val(node.data.name);
+						aliasEl.val(node.data.alias);
 						dialog.data.find('.ok').click(function()
 						{
 							var name = nameEl.val();
 							var alias = aliasEl.val();
 							$.modal.close();
-							exec('treeaction.php', 
+							cmdAsync(prepareCmd('treeaction.php', 
 								{
 									tree:'our',
 									action: 'edit',
 									id: node.data.key,
 									name: name,
 									alias: alias
-								}, 
+								}), 
 								function(res)
 								{
 									if(res)
 									{
+										node.data.name = name;
+										node.data.alias = alias;
 										node.data.title = name;
-										el.attr('my-alias', alias);
+										if(alias) node.data.title+='('+alias+')';
 										node.render();
 									}
 								}

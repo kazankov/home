@@ -33,6 +33,21 @@ class Our
 			array('safe'=>true)
 		)); 
 	}
+	
+	function delete()
+	{
+	
+	}
+	
+	function add()
+	{
+	
+	}
+	
+	function addChild()
+	{
+	
+	}
 }
 
 

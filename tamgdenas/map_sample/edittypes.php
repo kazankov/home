@@ -72,9 +72,7 @@ function getOurTypes($parentId=null)
 	function bindContextMenu(node, span) {
 		$(span).contextMenu({menu: 'ourMenu'}, function(action, el, pos) 
 		{
-			var node = $.ui.dynatree.getNode(el);
-			
-			if(action == 'edit') 
+			var editFunc = function(node)
 			{
 				$('#ourEditForm').modal({
 					onShow: function(dialog)
@@ -111,11 +109,50 @@ function getOurTypes($parentId=null)
 							);	
 						});
 					}
-				});
+				});			
+			}
+			
+			var node = $.ui.dynatree.getNode(el);
+			
+			if(action == 'edit') 
+			{
+				editFunc(node);
 				return false;
 			}
 			
-			//exec('treeaction.php', {tree: 'our', action: action, 
+			cmdAsync(prepareCmd('treeaction.php', 
+				{
+					tree:'our',
+					action: action,
+					id: node.data.key
+				}), 
+				function(res)
+				{
+					if(action == 'delete')
+					{
+						if(res) node.remove();
+					}
+					if((action == 'add' || action == 'addChild') && res)
+					{
+						var obj = {
+							key: res.id,
+							name: res.name,
+							title: res.name
+						};
+						if(res.sourceNames)
+						{
+							obj.alias = res.sourceNames.join(', ');
+							obj.title = obj.title + '('+ obj.alias + ')';
+						}
+						
+						var newNode = null; 						
+						if(action == 'add') newNode = node.getParent().addChild(obj);
+						if(action == 'addChild') newNode = node.addChild(obj);
+						editFunc(newNode);
+					}
+					
+				}
+			);	
 		});
 	}
 	

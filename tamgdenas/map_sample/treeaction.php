@@ -24,29 +24,55 @@ class Our
 			}
 		}
 		
-		return json_encode($mongo->poi->poiTypes->update(
+		$cur = $mongo->poi->poiTypes->findOne(array('_id'=>new MongoId($_GET['id'])));
+		
+		$cur['name'] = $_GET['name'];
+		$cur['sourceNames'] = $buf;
+		return json_encode($mongo->poi->poiTypes->save($cur, array('safe'=>true)));
+		
+		/*return json_encode($mongo->poi->poiTypes->update(
 			array('_id'=>new MongoId($_GET['id'])),
 			array(
 				'name'=>$_GET['name'],
-				'sourceNames'=>$buf
+				'sourceNames'=>$buf,
+				'parent'=>$cur['parent'] 
 			),
 			array('safe'=>true)
-		)); 
+		)); */
 	}
 	
 	function delete()
 	{
-	
+		global $mongo;
+		if(!$_GET['id']) return false;
+		
+		return
+			$mongo->poi->poiTypes->remove(array('parent'=>new MongoId($_GET['id']))) && 
+			$mongo->poi->poiTypes->remove(array('_id'=>new MongoId($_GET['id'])));		
 	}
 	
 	function add()
 	{
-	
+		global $mongo;
+		$cur = $mongo->poi->poiTypes->findOne(array('_id'=>new MongoId($_GET['id'])));
+		if(!$cur) return false; 
+		
+		$obj = array('name'=>'Новый тип');
+		if($cur['parent']) $obj['parent'] = $cur['parent'];
+		$mongo->poi->poiTypes->insert($obj);
+		return json_encode($obj);
 	}
 	
-	function addChild()
+	function addchild()
 	{
-	
+		global $mongo;
+		$cur = $mongo->poi->poiTypes->findOne(array('_id'=>new MongoId($_GET['id'])));
+		if(!$cur) return false; 
+		
+		$obj = array('name'=>'Новый тип');
+		$obj['parent'] = $cur['_id'];
+		$mongo->poi->poiTypes->insert($obj);
+		return json_encode($obj);	
 	}
 }
 

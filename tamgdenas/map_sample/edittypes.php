@@ -72,7 +72,7 @@ function getOurTypes($parentId=null)
 	function bindContextMenu(node, span) {
 		$(span).contextMenu({menu: 'ourMenu'}, function(action, el, pos) 
 		{
-			var editFunc = function(node)
+			var editFunc = function(nd)
 			{
 				$('#ourEditForm').modal({
 					onShow: function(dialog)
@@ -80,8 +80,8 @@ function getOurTypes($parentId=null)
 						var nameEl = dialog.data.find('.name').first();
 						var aliasEl = dialog.data.find('.alias').first();
 						
-						nameEl.val(node.data.name);
-						aliasEl.val(node.data.alias);
+						nameEl.val(nd.data.name);
+						aliasEl.val(nd.data.alias);
 						dialog.data.find('.ok').click(function()
 						{
 							var name = nameEl.val();
@@ -91,7 +91,7 @@ function getOurTypes($parentId=null)
 								{
 									tree:'our',
 									action: 'edit',
-									id: node.data.key,
+									id: nd.data.key,
 									name: name,
 									alias: alias
 								}), 
@@ -99,11 +99,11 @@ function getOurTypes($parentId=null)
 								{
 									if(res)
 									{
-										node.data.name = name;
-										node.data.alias = alias;
-										node.data.title = name;
-										if(alias) node.data.title+='('+alias+')';
-										node.render();
+										nd.data.name = name;
+										nd.data.alias = alias;
+										nd.data.title = name;
+										if(alias) nd.data.title+='('+alias+')';
+										nd.render();
 									}
 								}
 							);	
@@ -120,6 +120,11 @@ function getOurTypes($parentId=null)
 				return false;
 			}
 			
+			if(action == 'delete')
+			{
+				if(!confirm('Вы уверены, что хотите удалить '+ node.data.name+'?')) return false;
+			}
+			
 			cmdAsync(prepareCmd('treeaction.php', 
 				{
 					tree:'our',
@@ -132,10 +137,10 @@ function getOurTypes($parentId=null)
 					{
 						if(res) node.remove();
 					}
-					if((action == 'add' || action == 'addChild') && res)
+					if((action == 'add' || action == 'addchild') && res)
 					{
 						var obj = {
-							key: res.id,
+							key: res._id['$id'],
 							name: res.name,
 							title: res.name
 						};
@@ -147,8 +152,11 @@ function getOurTypes($parentId=null)
 						
 						var newNode = null; 						
 						if(action == 'add') newNode = node.getParent().addChild(obj);
-						if(action == 'addChild') newNode = node.addChild(obj);
+						if(action == 'addchild') newNode = node.addChild(obj);
+						if(!newNode) alert('error');
+
 						editFunc(newNode);
+						newNode.activate();
 					}
 					
 				}

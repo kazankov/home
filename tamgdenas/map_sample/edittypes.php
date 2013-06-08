@@ -52,7 +52,7 @@ function getOurTypes($parentId=null)
 				h.addClass('active');
 				
 				var j = 0;
-				body.children().each(function()
+				body.children('div').each(function()
 				{
 					var b = $(this); 
 					if(j == tabId) 
@@ -67,6 +67,30 @@ function getOurTypes($parentId=null)
 			i++;
 		});
 		header.find('>:first-child').trigger('click');
+	}
+	
+	function setOur(nd, name, alias)
+	{
+		cmdAsync(prepareCmd('treeaction.php', 
+			{
+				tree:'our',
+				action: 'edit',
+				id: nd.data.key,
+				name: name,
+				alias: alias
+			}), 
+			function(res)
+			{
+				if(res)
+				{
+					nd.data.name = name;
+					nd.data.alias = alias;
+					nd.data.title = name;
+					if(alias) nd.data.title+='('+alias+')';
+					nd.render();
+				}
+			}
+		);		
 	}
 	
 	function bindContextMenu(node, span) {
@@ -87,26 +111,7 @@ function getOurTypes($parentId=null)
 							var name = nameEl.val();
 							var alias = aliasEl.val();
 							$.modal.close();
-							cmdAsync(prepareCmd('treeaction.php', 
-								{
-									tree:'our',
-									action: 'edit',
-									id: nd.data.key,
-									name: name,
-									alias: alias
-								}), 
-								function(res)
-								{
-									if(res)
-									{
-										nd.data.name = name;
-										nd.data.alias = alias;
-										nd.data.title = name;
-										if(alias) nd.data.title+='('+alias+')';
-										nd.render();
-									}
-								}
-							);	
+							setOur(nd, name, alias);
 						});
 					}
 				});			
@@ -180,7 +185,21 @@ function getOurTypes($parentId=null)
 				{
 					return ["over"];
 				},
-			    onDrop: function(node, sourceNode, hitMode, ui, draggable) {alert(sourceNode);}
+			    onDrop: function(node, sourceNode, hitMode, ui, draggable) 
+				{
+					
+					if(!sourceNode) return false;
+					
+					var buf = [];
+					if(node.data.alias) buf = node.data.alias.split(',');
+					var sourceName = $.trim(sourceNode.data.title);
+					for(var i=0; i<buf.lenght; i++) buf[i] = $.trim(buf[i]);
+					if(buf.indexOf(sourceName) == -1)
+					{
+						buf.push(sourceName);
+					}
+					setOur(node, node.data.name, buf.join(', '));
+				}
 			},
 			onCreate: bindContextMenu
 		}).dynatree('getRoot');

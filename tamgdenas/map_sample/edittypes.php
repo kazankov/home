@@ -170,8 +170,6 @@ function getOurTypes($parentId=null)
 	}
 	
 	var ourTree = null;
-	var foursquareTree = null;
-	
 	
 	$(document).ready(function()
 	{
@@ -203,17 +201,23 @@ function getOurTypes($parentId=null)
 			},
 			onCreate: bindContextMenu
 		}).dynatree('getRoot');
-		foursquareTree = $("#foursquareTree").dynatree(
-		{
-			dnd: 
-			{
-				onDragStart: function(event)
-				{
-					return true;
-				}
-			}
-		}).dynatree('getRoot');
 		
+		
+		var trees = ['foursquareTree', 'googleplacestree', 'geonamestree'];
+		for(var i=0; i < trees.length; i++)
+		{
+			var iter = trees[i];
+			$('#'+iter).dynatree(
+			{
+				dnd: 
+				{
+					onDragStart: function(event)
+					{
+						return true;
+					}
+				}
+			});
+		}	
 	});
 </script>
 <style type="text/css">
@@ -244,10 +248,12 @@ function getOurTypes($parentId=null)
 
 <table>
 	<tr>
-		<td valign="top" width="300">
-			Наши типы<br>
-			<div id="ourTree">
-			<? getOurTypes(); ?>
+		<td valign="top" width="500">
+			<div style="position:fixed; left:0; top:0;">
+				Наши типы<br>
+				<div id="ourTree">
+				<? getOurTypes(); ?>
+				</div>
 			</div>
 		</td>
 		<td valign="top">
@@ -280,8 +286,40 @@ function getFoursquareTypes($parentId=null)
 getFoursquareTypes('root');
 ?>					
 					</div>
-					<div class="tab">google places</div>
-					<div class="tab">geonames</div>				
+					<div class="tab" id="googleplacestree">
+<?
+	global $pg;
+	$result = pg_query("select * from googleplaces_poi_types_en") or die('Query failed: ' . pg_last_error());
+	if(pg_num_rows($result) > 0)
+	{
+	?>
+		<ul>
+		<? while ($iter = pg_fetch_array($result, null, PGSQL_ASSOC)) { ?>
+			<li id="<?=$iter['name']?>"><?=$iter['name']?>
+		<?	
+		} ?>
+		</ul>
+	<?
+	}
+?>					
+					</div>
+					<div class="tab" id="geonamestree">
+<?
+	global $pg;
+	$result = pg_query("select * from geoname_feature_codes_ru") or die('Query failed: ' . pg_last_error());
+	if(pg_num_rows($result) > 0)
+	{
+	?>
+		<ul>
+		<? while ($iter = pg_fetch_array($result, null, PGSQL_ASSOC)) { ?>
+			<li id="<?=$iter['fcode']?>"><?=$iter['name']?>
+		<?	
+		} ?>
+		</ul>
+	<?
+	}	
+?>									
+					</div>				
 				</div>
 			</div>
 		</td>		

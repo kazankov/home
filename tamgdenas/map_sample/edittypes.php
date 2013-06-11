@@ -12,7 +12,7 @@ $pg = pg_connect("host={$cfg->pg->host} dbname={$cfg->pg->db} user={$cfg->pg->us
 function getOurTypes($parentId=null)
 {
 	global $mongo;
-	$cursor = $mongo->poi->poiTypes->find(array('parent'=>$parentId));
+	$cursor = $mongo->poi->poiTypes_buf->find(array('parent'=>$parentId));
 	if(count($cursor) > 0)
 	{
 	?>

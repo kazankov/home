@@ -81,4 +81,5 @@ $className = ucfirst($_GET['tree']);
 $tree = new $className;
 $action = $_GET['action'];
 echo  $tree->$action();
+
 ?>

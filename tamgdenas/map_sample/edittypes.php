@@ -52,7 +52,7 @@ function getOurTypes($parentId=null)
 				h.addClass('active');
 				
 				var j = 0;
-				body.children('div').each(function()
+				body.children('div .tab').each(function()
 				{
 					var b = $(this); 
 					if(j == tabId) 
@@ -207,7 +207,10 @@ function getOurTypes($parentId=null)
 		{
 			dnd: 
 			{
-				onDragStart: function(){return true;}
+				onDragStart: function(event)
+				{
+					return true;
+				}
 			}
 		}).dynatree('getRoot');
 		
@@ -256,7 +259,7 @@ function getOurTypes($parentId=null)
 					<span>geonames</span>
 				</div>
 				<div class="body">
-					<div id="foursquareTree">
+					<div id="foursquareTree" class="tab">
 <?
 function getFoursquareTypes($parentId=null)
 {
@@ -277,8 +280,8 @@ function getFoursquareTypes($parentId=null)
 getFoursquareTypes('root');
 ?>					
 					</div>
-					<div>google places</div>
-					<div>geonames</div>				
+					<div class="tab">google places</div>
+					<div class="tab">geonames</div>				
 				</div>
 			</div>
 		</td>		

@@ -87,6 +87,7 @@ function getOurTypes($parentId=null)
 					nd.data.alias = alias;
 					nd.data.title = name;
 					if(alias) nd.data.title+='('+alias+')';
+					refreshAliases();
 					nd.render();
 				}
 			}
@@ -163,13 +164,38 @@ function getOurTypes($parentId=null)
 						editFunc(newNode);
 						newNode.activate();
 					}
-					
+					refreshAliases();	
 				}
 			);	
 		});
 	}
 	
 	var ourTree = null;
+	var sourceTrees = [];
+	
+	function refreshAliases()
+	{
+		var aliases = {};
+		ourTree.visit(function(node)
+		{
+			if(node.data.alias)
+			{
+				var buf = node.data.alias.split(',');
+				for(var i=0; i<buf.length; i++)
+				{
+					aliases[$.trim(buf[i])] = true;
+				}
+			}
+		});
+		
+		for(var i=0; i<sourceTrees.length; i++)
+		{
+			sourceTrees[i].visit(function(node)
+			{
+				node.select($.trim(node.data.title) in aliases);
+			});
+		}
+	}
 	
 	$(document).ready(function()
 	{
@@ -207,7 +233,7 @@ function getOurTypes($parentId=null)
 		for(var i=0; i < trees.length; i++)
 		{
 			var iter = trees[i];
-			$('#'+iter).dynatree(
+			sourceTrees.push($('#'+iter).dynatree(
 			{
 				dnd: 
 				{
@@ -216,8 +242,10 @@ function getOurTypes($parentId=null)
 						return true;
 					}
 				}
-			});
+			}).dynatree('getRoot'));
 		}	
+		
+		refreshAliases();
 	});
 </script>
 <style type="text/css">

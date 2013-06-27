@@ -1,82 +1,103 @@
 <?php
 clearstatcache();
 
-function errorHandler($errno, $errstr, $errfile, $errline)
+function error($errstr)
 {
-	header('HTTP/1.1 500 Internal Server Error');
-	die($errstr);
+	throw new Exception($errstr);
 }
 
-function stripCommentSymbols($s)
+function myErrorHandler($errno, $errstr, $errfile, $errline)
 {
-	$s = preg_replace('/\/\*\*/', '', $s);
-	$s = preg_replace('/\*\//', '', $s);
-	return preg_replace('/\*/', '', $s);
+	throw new Exception("{$errfile}, {$errline}: {$errstr}");
 }
+set_error_handler("myErrorHandler", E_ERROR | E_WARNING);
 
-function showCmds($method)
+function myAssertHandler($file, $line, $code)  
+{  
+  echo "Assertion Failed:<br> 
+        <b>File</b> '$file' <br>
+        <b>Line</b> '$line' <br>
+        <b>Code</b> '$code'<br>";  
+}  
+
+assert_options(ASSERT_ACTIVE, 1);  
+assert_options(ASSERT_WARNING, 0);  
+assert_options(ASSERT_BAIL, 1);  
+assert_options(ASSERT_QUIET_EVAL, 1);  
+assert_options(ASSERT_CALLBACK, 'myAssertHandler');  
+
+
+
+ob_start();
+try
 {
-	$srv = new ReflectionClass($method); 
-	echo "<p align='center'><b>".stripCommentSymbols($srv->getDocComment())."</b></p>";
-	$farr = $srv->getMethods();
-	foreach($farr as $cmd)
+	$cmdName = null;
+	require_once 'Net/URL2.php';
+	$urlObj = new Net_URL2('http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']);
+	$pathArr = explode('/', $urlObj->getPath());
+	if(count($pathArr) > 1 && $pathArr[1])
 	{
-		$refl = $srv->getMethod($cmd->name);
-		$params = $refl->getParameters();
+		$cmdName = $pathArr[1];
+	}
+	
+	if(!$cmdName)
+	{
+	?>
+	<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	</head>
+	<body>
+	<?php
+		require_once 'reflection.php';
+		foreach (glob("commands/*.php") as $fileName) 
+		{
+			require_once $fileName;
+			$cmdName = basename($fileName, '.php');
+			showCmd($cmdName);
+		}
+	?>
+	</body>
+	</html>
+	<?php
+	}else{
+		require_once "commands/{$cmdName}.php";
+		$className = ucfirst($cmdName);
+		$method = strtolower($_SERVER['REQUEST_METHOD']);
+		
+		
+		//получение переменных запроса
+		$vars = null;
+		switch($method)
+		{
+			case 'get':
+				$vars = $_GET;
+			break;
+			case 'post':
+				$vars = $_POST;
+			break;
+			default:
+				parse_str(file_get_contents("php://input"),$vars);
+		}
+		
+		//преобразование переменных запроса в аргументы функции
+		$_class = new ReflectionClass($className); 		
+		$_method = $_class->getMethod($method);
+		$params = $_method->getParameters();
 		$buf = array();
 		for($i = 0; $i < count($params); $i++)
 		{	
-			$buf[] = $params[$i]->getName();
+			$buf[] = $vars[$params[$i]->getName()];
 		}
-		echo "<p><b>{$cmd->name}(".implode(', ', $buf).")</b></p>";
-		echo stripCommentSymbols($cmd->getDocComment());
-		//здесь нужно сделать форму, чтобы выполнять не только GET
-		echo "<br><br><table><tr><td><form name='{$method}_{$cmd->name}'><table>";
-		echo "<input type='hidden' name='method' value='$method'>";
-		foreach($buf as $p)
-		{
-			echo "<tr><td width='80'>$p: </td><td><input name='$p'></td></tr>";
-		}
-		echo "</table></form></td><td valign='top'><button name='{$cmd->name}' title='$method' onclick='alert(\"Не готово\");'>Выполнить</button> <a>&nbsp;</a></td></tr></table><hr>";		
+		
+		$obj = new $className;
+		echo json_encode($_method->invokeArgs($obj, $buf));
 	}
-}
-
-set_error_handler(errorHandler, E_ALL^E_NOTICE);
-
-
-$cmdName = null;
-if(!$cmdName)
+}catch (Exception $e)
 {
-header('Content-type: text/html; charset=utf-8');
-?>
-<html>
-<head>
-
-</head>
-<body>
-<?php
-	showCmds('Test');
-?>
-</body>
-</html>
-<?php
-}else{
-	//execCmd($cmdName, $_GET, $method);
+	header('HTTP/1.1 500 Internal Server Error');
+	header('Content-Type: text/html; charset=utf-8'); 
+	echo $e->getMessage();
 }
-
-//************* команды ***************
-/**
-* Тестовая команда
-*/
-class Test{
-	/**
-	*	получить тестовый объект (пока не работает)
-	*/
-	function get($argument)
-	{
-	
-	}
-}
-
 
 ?>

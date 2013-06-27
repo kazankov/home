@@ -1,0 +1,8 @@
+RewriteEngine on
+RewriteRule !js/.* index.php 
+
+php_flag magic_quotes_gpc off
+php_flag register_globals off
+php_value session.gc_maxlifetime 86400
+php_value session.cookie_lifetime 86400
+        

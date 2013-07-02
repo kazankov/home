@@ -1,0 +1,1 @@
+<?/*** Тестовая команда*/class Poi{	/**	*	получить POI	*/	function get($id)	{		global $db;		return $db->poi->findOne(array('_id' => new MongoId($id)));	}	/*function delete($id)	{		return $db->poi->remove(array('_id' => new MongoId($id)), array("justOne" => true));	}*/		}?>

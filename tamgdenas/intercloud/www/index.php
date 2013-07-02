@@ -28,9 +28,12 @@ assert_options(ASSERT_CALLBACK, 'myAssertHandler');
 
 
 
+
+
 ob_start();
 try
 {
+	$db = null;
 	$cmdName = null;
 	require_once 'Net/URL2.php';
 	$urlObj = new Net_URL2('http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']);
@@ -61,30 +64,68 @@ try
 	</html>
 	<?php
 	}else{
-		function json_safe_encode($var)
+		$cfg = parse_ini_file($_SERVER['DOCUMENT_ROOT'].'/config.ini', true);
+		foreach($cfg as $k=>$v)
 		{
-		   return json_encode(json_fix_cyr($var));
+			$cfg[$k] = (object)$v; 
 		}
-
-		function json_fix_cyr($var)
+		$cfg = (object)$cfg;
+		
+		
+	/*	class Collection
 		{
-		   if (is_array($var)) {
-			   $new = array();
-			   foreach ($var as $k => $v) {
-				   $new[json_fix_cyr($k)] = json_fix_cyr($v);
-			   }
-			   $var = $new;
-		   } elseif (is_object($var)) {
-			   $vars = get_object_vars($var);
-			   foreach ($vars as $m => $v) {
-				   $var->$m = json_fix_cyr($v);
-			   }
-		   } elseif (is_string($var)) {
-			   $var = iconv('cp1251', 'utf-8', $var);
-		   }
-		   return $var;
-		}	
-	
+			public $mongoCollection;
+			public function __construct(&$mongoCollection)
+			{
+				$this->mongoCollection = $mongoCollection;
+			}	
+
+			public function __call($name, $arguments)
+			{
+				return call_user_func_array(array($this->mongoCollection,$name), $arguments);
+			}	
+			
+			private function removeIds(&$obj)
+			{
+				if(get_class($obj) == 'MongoId') return (string)$obj;
+			
+				foreach($obj as $key=>$value)
+				{
+					if(is_object($obj[$key]) || is_array($obj[$key])) removeIds($obj);
+					
+				}
+			}
+
+			public function findOne($query = array(), $fields = array())
+			{
+				$buf = $this->mongoCollection->findOne($query, $fields);
+				if(array_key_exists('_id', $buf))
+				{
+					$val = $buf['_id'];
+					unset($buf['_id']);
+					$buf['id'] = (string)$val;
+				}
+				return $buf;
+			}
+		}
+		
+		class Db
+		{
+			private $mongoDb;
+			public function __construct(&$mongoDb)
+			{
+				$this->mongoDb = $mongoDb;
+			}
+			
+			public function __get($name)
+			{
+				return new Collection($this->mongoDb->$name);
+			}
+		}*/
+		
+		$mongo = new MongoClient("mongodb://{$cfg->mongo->host}");
+		$buf = $cfg->mongo->db;
+		$db = $mongo->$buf;		
 	
 		require_once "commands/{$cmdName}.php";
 		$className = ucfirst($cmdName);
@@ -116,7 +157,12 @@ try
 		}
 		
 		$obj = new $className;
-		echo json_encode($_method->invokeArgs($obj, $buf), JSON_UNESCAPED_UNICODE);
+		try
+		{
+			echo json_encode($_method->invokeArgs($obj, $buf), JSON_UNESCAPED_UNICODE);
+		}catch (Exception $e){
+			echo json_encode($_method->invokeArgs($obj, $buf));
+		}
 	}
 }catch (Exception $e)
 {

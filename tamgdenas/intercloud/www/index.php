@@ -71,58 +71,6 @@ try
 		}
 		$cfg = (object)$cfg;
 		
-		
-	/*	class Collection
-		{
-			public $mongoCollection;
-			public function __construct(&$mongoCollection)
-			{
-				$this->mongoCollection = $mongoCollection;
-			}	
-
-			public function __call($name, $arguments)
-			{
-				return call_user_func_array(array($this->mongoCollection,$name), $arguments);
-			}	
-			
-			private function removeIds(&$obj)
-			{
-				if(get_class($obj) == 'MongoId') return (string)$obj;
-			
-				foreach($obj as $key=>$value)
-				{
-					if(is_object($obj[$key]) || is_array($obj[$key])) removeIds($obj);
-					
-				}
-			}
-
-			public function findOne($query = array(), $fields = array())
-			{
-				$buf = $this->mongoCollection->findOne($query, $fields);
-				if(array_key_exists('_id', $buf))
-				{
-					$val = $buf['_id'];
-					unset($buf['_id']);
-					$buf['id'] = (string)$val;
-				}
-				return $buf;
-			}
-		}
-		
-		class Db
-		{
-			private $mongoDb;
-			public function __construct(&$mongoDb)
-			{
-				$this->mongoDb = $mongoDb;
-			}
-			
-			public function __get($name)
-			{
-				return new Collection($this->mongoDb->$name);
-			}
-		}*/
-		
 		$mongo = new MongoClient("mongodb://{$cfg->mongo->host}");
 		$buf = $cfg->mongo->db;
 		$db = $mongo->$buf;		
@@ -159,9 +107,9 @@ try
 		$obj = new $className;
 		try
 		{
-			echo json_encode($_method->invokeArgs($obj, $buf), JSON_UNESCAPED_UNICODE);
+			echo json_encode((array)$_method->invokeArgs($obj, $buf), JSON_UNESCAPED_UNICODE);
 		}catch (Exception $e){
-			echo json_encode($_method->invokeArgs($obj, $buf));
+			echo json_encode((array)$_method->invokeArgs($obj, $buf));
 		}
 	}
 }catch (Exception $e)

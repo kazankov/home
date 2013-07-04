@@ -52,7 +52,7 @@ try
 	</head>
 	<body>
 	<?php
-		require_once 'reflection.php';
+		require_once 'modules/reflection.php';
 		foreach (glob("commands/*.php") as $fileName) 
 		{
 			require_once $fileName;

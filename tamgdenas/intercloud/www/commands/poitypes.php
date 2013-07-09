@@ -1,0 +1,1 @@
+<?require_once $_SERVER['DOCUMENT_ROOT'].'/modules/command.php';/*** Типы POI*/class Poitypes{	/**	*	получить типы POI	*/	function get($parent)	{		global $db;		if(!$parent) $parent = null;		return fixMongoId(iterator_to_array($db->poiTypes->find(array('parent'=>$parent)), false));	}}?>

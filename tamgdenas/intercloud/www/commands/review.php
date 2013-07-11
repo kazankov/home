@@ -1,0 +1,1 @@
+<?require_once $_SERVER['DOCUMENT_ROOT'].'/modules/command.php';/*** Отзыв*/class Review{	/**	*	получить отзыв (идентификатор отзыва получается из команды POI/get )	*/	function get($id)	{		global $db;		return fixMongoId($db->reviews->findOne(array('_id' => new MongoId($id))));	}}?>

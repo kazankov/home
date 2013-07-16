@@ -105,11 +105,11 @@ try
 		}
 		
 		$obj = new $className;
-		try
+		if(version_compare(PHP_VERSION, '5.4.0') >= 0)
 		{
-			echo json_encode((array)$_method->invokeArgs($obj, $buf), JSON_UNESCAPED_UNICODE);
-		}catch (Exception $e){
-			echo json_encode((array)$_method->invokeArgs($obj, $buf));
+			echo json_encode($_method->invokeArgs($obj, $buf), JSON_UNESCAPED_UNICODE);
+		}else{
+			echo json_encode($_method->invokeArgs($obj, $buf));
 		}
 	}
 }catch (Exception $e)

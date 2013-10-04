@@ -1,6 +1,6 @@
 <?php
 require_once "HTTP/Request2.php";
-//русский текст
+//СЂСѓСЃСЃРєРёР№ С‚РµРєСЃС‚
 
 abstract class PresentationSource
 {
@@ -85,7 +85,7 @@ class Slideshare extends PresentationSource
 		{
 			$id = $matches[1];
 		}
-		if(!$id)error('ошибка slideshow '. $xmlString);
+		if(!$id)error('РѕС€РёР±РєР° slideshow '. $xmlString);
 		return "http://www.slideshare.net/slideshow/embed_code/$id";		
 	}
 	
@@ -104,7 +104,7 @@ class Slideshare extends PresentationSource
 		{
 			$id = $matches[1];
 		}
-		if(!$id) error('неверный адрес');
+		if(!$id) error('РЅРµРІРµСЂРЅС‹Р№ Р°РґСЂРµСЃ');
 		
 		$req =new HTTP_Request2('https://www.slideshare.net/api/1/delete_slideshow', HTTP_Request2::METHOD_POST);
 		$req->addPostParameter(array(
@@ -132,7 +132,7 @@ class Slideshare extends PresentationSource
 		{
 			$id = $matches[1];
 		}
-		if(!$id)error('ошибка slideshow '. $xmlString);
+		if(!$id)error('РѕС€РёР±РєР° slideshow '. $xmlString);
 		return $id;			
 	}
 }
@@ -156,7 +156,7 @@ class Youtube extends PresentationSource
 		$key = $this->key;
 		$api_name = $this->api_name;
 		
-		//получение токена********
+		//РїРѕР»СѓС‡РµРЅРёРµ С‚РѕРєРµРЅР°********
 		$req =new HTTP_Request2('https://www.google.com/youtube/accounts/ClientLogin', HTTP_Request2::METHOD_POST);
 		$req->addPostParameter(array(
 			'Content-Type' => 'application/x-www-form-urlencoded'
@@ -183,7 +183,7 @@ class Youtube extends PresentationSource
 		if(!$token) error('invalid token');
 		//****************
 		
-		//отправка заголовков и видео***** 
+		//РѕС‚РїСЂР°РІРєР° Р·Р°РіРѕР»РѕРІРєРѕРІ Рё РІРёРґРµРѕ***** 
 		$boundary = 'f93dcbA3';
 		
 		if(!$tags) 
@@ -192,12 +192,12 @@ class Youtube extends PresentationSource
 		}else{
 			$buf = explode(',', $tags);
 			$buf2 = array();
-			foreach($buf as $iter) //длина слова от 2 до 25 символов
+			foreach($buf as $iter) //РґР»РёРЅР° СЃР»РѕРІР° РѕС‚ 2 РґРѕ 25 СЃРёРјРІРѕР»РѕРІ
 			{
 				if(mb_strlen($iter) < 2) $iter .= '_saas.ru';
 				$buf2[]= mb_substr($iter, 0, 25);  
 			}
-			$tags = mb_substr(implode(',', $buf2), 0, 120); //всех вместе - меньше 120 символов
+			$tags = mb_substr(implode(',', $buf2), 0, 120); //РІСЃРµС… РІРјРµСЃС‚Рµ - РјРµРЅСЊС€Рµ 120 СЃРёРјРІРѕР»РѕРІ
 		}
 		
 		$xml = 	"<?xml version='1.0'?>
@@ -243,7 +243,7 @@ class Youtube extends PresentationSource
 		$request.="\r\n";
 		
 		socket_set_timeout($fp, 10);
-		fputs($fp,$request,strlen($request)) or error('Ошибка записи в сокет');
+		fputs($fp,$request,strlen($request)) or error('РћС€РёР±РєР° Р·Р°РїРёСЃРё РІ СЃРѕРєРµС‚');
 		$response = fread($fp,3280);
 		fclose($fp);	
 		
@@ -253,7 +253,7 @@ class Youtube extends PresentationSource
 			$id = $matches[1];
 			$videoUrl = "http://www.youtube.com/embed/$id";
 		}		
-		if(!$videoUrl) error('Ошибка видео: '.$response);
+		if(!$videoUrl) error('РћС€РёР±РєР° РІРёРґРµРѕ: '.$response);
 		return $videoUrl;	
 	}
 	function delete($url)
@@ -267,9 +267,9 @@ class Youtube extends PresentationSource
 		{
 			$id = $matches[1];
 		}
-		if(!$id) error('неверный адрес');
+		if(!$id) error('РЅРµРІРµСЂРЅС‹Р№ Р°РґСЂРµСЃ');
 		
-		//получение токена********
+		//РїРѕР»СѓС‡РµРЅРёРµ С‚РѕРєРµРЅР°********
 		$req =new HTTP_Request2('https://www.google.com/youtube/accounts/ClientLogin', HTTP_Request2::METHOD_POST);
 		$req->addPostParameter(array(
 			'Content-Type' => 'application/x-www-form-urlencoded'
@@ -296,7 +296,7 @@ class Youtube extends PresentationSource
 		if(!$token) error('invalid token');
 		//****************
 		
-		//удаление видео***** 
+		//СѓРґР°Р»РµРЅРёРµ РІРёРґРµРѕ***** 
 		$fp = fsockopen ("gdata.youtube.com", 80, $errno, $errstr, 20);
 		if(!$fp) error('cant open socket');
 
@@ -316,7 +316,7 @@ class Youtube extends PresentationSource
 		
 		if(!preg_match('/200 OK/', $response, $matches))
 		{
-			error('Ошибка видео: '.$response);
+			error('РћС€РёР±РєР° РІРёРґРµРѕ: '.$response);
 		}		
 		return $id;		
 	}

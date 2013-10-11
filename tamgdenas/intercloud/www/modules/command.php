@@ -1,4 +1,5 @@
 <?
+define('FILE_CONSTANT', null);
 //русский текст
 require_once 'Net/URL2.php';
 

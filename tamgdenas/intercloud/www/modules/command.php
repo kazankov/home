@@ -13,6 +13,11 @@ function normUrl($url)
 	return $buf->getNormalizedURL();
 }
 
+function sqr($x)
+{
+	return $x*$x;
+}
+
 define('DATETIME_FORMAT', 'Y-m-d H:i:s');
 function getDateTime()
 {

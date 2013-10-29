@@ -1,0 +1,1 @@
+<?require_once $_SERVER['DOCUMENT_ROOT'].'/modules/command.php';/*** Список пользователей*/class Users{	/**	*	Получить 	*/		function get()	{		global $db;		return fixMongoId(array_values(iterator_to_array($db->users->find())));	}}?>

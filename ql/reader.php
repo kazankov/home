@@ -19,31 +19,39 @@ function gotcha(&$buf, $begin, $s){
 	$out = '8'.$begin;
 	if (preg_match('/(\d+)-(\d+)/', $s, $matches)) {
 	
-		$v1 = $matches[1];
-		$v2 = $matches[2];
+		$v1 = ltrim($matches[1], '0');
+		$v2 = ltrim($matches[2], '0');
 		
 		
 		$dif = intval($v2) - intval($v1);
-		while($dif > 1) { 
-			gotcha($buf, $begin, "{$v1}-".($v1+1));
-			$v1 = $v1 + 1;
+		
+		while($dif > 9) { 
+			gotcha($buf, $begin, "{$v1}-".($v1+9));
+			$v1 = $v1 + 9;
 			$dif = intval($v2) - intval($v1);
+			if($dif <= 0) return false;
 		}
-		if($dif <= 1)
-		{
-			$start = str_intersection($v1, $v2);
-			$nS = mb_strlen($start);
-			
-			if(mb_strlen($v1) > 1 || mb_strlen($v2) > 1) return;
+		
+		if($dif <= 9)
+		{		
+			if(mb_substr($v1, 0, -1).'9' == $v2) return;
+			gotcha($buf, $begin, $v1.'-'.mb_substr($v1, 0, -1).'9');
 
-			$out.= $start.'['.mb_substr($v1, $nS).'-'.mb_substr($v2, $nS).']';
-			
-			$len = 10 - $nS;
-			if($len < 1) $len = 1;
-			if($len > 7) $len = 7;
-
-			$out.= '.{'.$len.'}';
+			$v1 = mb_substr($v2, 0, -1).'0';
 		}
+			
+		$start = str_intersection($v1, $v2);
+		$nS = mb_strlen($start);
+		
+		if('['.mb_substr($v1, $nS).'-'.mb_substr($v2, $nS).']' =='[-]') return; //UGLY
+
+		$out.= $start.'['.mb_substr($v1, $nS).'-'.mb_substr($v2, $nS).']';
+		
+		$len = 10 - $nS;
+		if($len < 1) $len = 1;
+		if($len > 7) $len = 7;
+
+		$out.= '.{'.$len.'}';
 	} else {
 		$out.= $s;
 		$len = 10 - mb_strlen($out);
@@ -78,3 +86,4 @@ fclose($handle);
 file_put_contents('out.csv', implode('; ', $buf));
 
 ?>
+

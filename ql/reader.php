@@ -24,18 +24,26 @@ function gotcha(&$buf, $begin, $s){
 		
 		
 		$dif = intval($v2) - intval($v1);
-		while($dif > 9) { 
-			gotcha($buf, $begin, "{$v1}-".($v1+9));
-			$v1 = $v1 + 9;
+		while($dif > 1) { 
+			gotcha($buf, $begin, "{$v1}-".($v1+1));
+			$v1 = $v1 + 1;
 			$dif = intval($v2) - intval($v1);
 		}
+		if($dif <= 1)
+		{
+			$start = str_intersection($v1, $v2);
+			$nS = mb_strlen($start);
+			
+			if(mb_strlen($v1) > 1 || mb_strlen($v2) > 1) return;
 
-		$start = str_intersection($v1, $v2);
-		$nS = mb_strlen($start);
+			$out.= $start.'['.mb_substr($v1, $nS).'-'.mb_substr($v2, $nS).']';
+			
+			$len = 10 - $nS;
+			if($len < 1) $len = 1;
+			if($len > 7) $len = 7;
 
-		$out.= $start.'['.mb_substr($v1, $nS).'-'.mb_substr($v2, $nS).'].';
-
-		$out.= '{'.(10 - $nS).'}';
+			$out.= '.{'.$len.'}';
+		}
 	} else {
 		$out.= $s;
 		$len = 10 - mb_strlen($out);

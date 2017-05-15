@@ -109,7 +109,7 @@ function gotcha(&$buf, $begin, $s){
 				$out.='[0-9]';
 			}
 			
-			$out .= '.{'.(10 - $len).'}'; 
+			if($len < 10) $out .= '.{'.(10 - $len).'}'; 
 		}
 		
 		$buf[]= $out;

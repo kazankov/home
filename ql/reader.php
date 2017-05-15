@@ -135,7 +135,7 @@ if ($handle) {
 }
 fclose($handle);
 
-file_put_contents('out.csv', implode('; ', $buf));
+file_put_contents('out.csv', implode(';', $buf));
 
 ?>
 

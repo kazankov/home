@@ -1,69 +1,119 @@
  <?php
 
 function str_intersection($a, $b) {
-	$result = '';
-	$len = mb_strlen($a) > mb_strlen($b) ? mb_strlen($b) : mb_strlen($a);
-	for ($i = 0; $i < $len; $i++) {
-		if (mb_substr($a, $i, 1) == mb_substr($b, $i, 1)) {
-			$result.= mb_substr($a, $i, 1);
-		} else {
-			break;
+	$out = '';
+	$l1 = mb_strlen($a);
+	$l2 = mb_strlen($a);
+	
+	for($i = 0; $i < min($l1, $l2); $i++){
+		if($a[$i] == $b[$i]) {
+			$out .= $a[$i];
+		}else{
+			return $out;
 		}
-
 	}
-	return $result;
+	
+	return $out;
+}
+
+
+function process($s){
+	$periods = array();
+	
+	$start = $s;
+	if (preg_match('/(\d+)-(\d+)/', $s, $matches)) {
+		$v1 = $matches[1];
+		$v2 = $matches[2];
+		
+		$start = str_intersection($v1, $v2);
+		
+		$v1 = mb_substr($v1, mb_strlen($start)); 
+		$v2 = mb_substr($v2, mb_strlen($start)); 
+		
+		$v1 = ltrim($v1, '0');
+		$v2 = ltrim($v2, '0');			
+		
+		if(mb_strlen($v1) != mb_strlen($v2))
+		{
+			
+			$l1 = mb_strlen($v1);
+			$l2 = mb_strlen($v2);
+			
+			if($l2 > $l1) {
+				$v1 = str_repeat('0', $l2 - $l1). $v1;
+			}else{
+				$v2 = str_repeat('0', $l1 - $l2). $v2;
+			}
+		}
+		
+		$getTail = false;
+		if(mb_strlen($v1) > 1){
+			$v1 = intval($v1);
+			
+			$tail = $v1 % 10;
+			$main = $v1 - $tail;
+			
+			$periods[]= [$start.($main / 10), 0, $tail];
+			$getTail = true;
+		}
+			
+		if(mb_strlen($v2) > 1){
+			$v2 = intval($v2);
+			
+			$tail = $v2 % 10;
+			$main = $v2 - $tail;	
+
+			$periods[]= [$start.($main / 10), 0, $tail];
+			
+			$getTail = true;
+		}
+		
+
+		if(!$getTail){
+			
+			$v1 = intval($v1);
+			$v2 = intval($v2);
+			
+			if($v2 - $v1 <= 0) throw new Exception('difference <= 0');
+			
+			$periods[]= [$start, $v1, $v2];
+		}
+	}else{
+		$periods[] = [$start, 0, 9];
+	}
+	
+	return $periods;
 }
 
 
 function gotcha(&$buf, $begin, $s){
-	$out = '8'.$begin;
-	if (preg_match('/(\d+)-(\d+)/', $s, $matches)) {
+	$periods = process($s);
+	foreach($periods as $p){
+		$out = '8'.$begin;
+		
+		$start = $p[0];
+		$v1 = $p[1];
+		$v2 = $p[2];
 	
-		$v1 = ltrim($matches[1], '0');
-		$v2 = ltrim($matches[2], '0');
+		$out.= $start;
+		$len = mb_strlen($out);
 		
-		
-		$dif = intval($v2) - intval($v1);
-		
-		while($dif > 9) { 
-			gotcha($buf, $begin, "{$v1}-".($v1+9));
-			$v1 = $v1 + 9;
-			$dif = intval($v2) - intval($v1);
-			if($dif <= 0) return false;
-		}
-		
-		if($dif <= 9)
-		{		
-			if(mb_substr($v1, 0, -1).'9' == $v2) return;
-			gotcha($buf, $begin, $v1.'-'.mb_substr($v1, 0, -1).'9');
-
-			$v1 = mb_substr($v2, 0, -1).'0';
-		}
+		if($len >  10) {$out = '8'.$begin.$s; echo $begin.'/'.$s. " > 10 \r\n";} //throw new Exception("{$len} >  9");
+		else{
+			if($v1 || $v2) {
+				if(!$v1) $v1 = 0;
+				if(!$v2) throw new Exception('not $v2');
+				
+				$out.= '['.$v1.'-'.$v2.']';
+			}else{
+				$out.='[0-9]';
+			}
 			
-		$start = str_intersection($v1, $v2);
-		$nS = mb_strlen($start);
+			$out .= '.{'.(10 - $len).'}'; 
+		}
 		
-		if('['.mb_substr($v1, $nS).'-'.mb_substr($v2, $nS).']' =='[-]') return; //UGLY
-
-		$out.= $start.'['.mb_substr($v1, $nS).'-'.mb_substr($v2, $nS).']';
-		
-		$len = 10 - $nS;
-		if($len < 1) $len = 1;
-		if($len > 7) $len = 7;
-
-		$out.= '.{'.$len.'}';
-	} else {
-		$out.= $s;
-		$len = 10 - mb_strlen($out);
-
-		$out.= '[0-9].{'.$len.'}';
+		$buf[]= $out;
 	}
-	
-	$buf[]=$out;
-	
-	//echo $out."\r\n";
-	
-	return $out;
 }
 
 $handle = fopen("in.csv", "r");
@@ -77,8 +127,10 @@ if ($handle) {
 			continue;
 		}
 		$i++;
+		
 		$data = explode(';', $line);
 		$out = gotcha($buf, $data[5], $data[6]);
+		//echo $data[5].'/'.$data[6]."\r\n";
 	}
 }
 fclose($handle);
